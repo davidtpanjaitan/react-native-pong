@@ -1,14 +1,29 @@
 import React, { Component } from "react";
 import { View,Text,Button,StyleSheet } from "react-native";
 
-const timer = () => {};
+let timer = () => {};
 
-class Stopwatch extends Component {
+export default class Stopwatch extends Component {
   constructor(props) {
     super(props);
     this.state = {
-        time: 0
+        time: 0,
+        stopped: false
       };
+  }
+
+  componentDidMount() {
+    if (this.props.down === true) {
+      this.countdownTimer(this.props.startTime);
+    } else {
+      this.countupTimer();
+    }
+  }
+
+  componentWillUnmount() {
+    if (!this.state.stopped) {
+      this.stop();
+    }
   }
 
   countdownTimer(startTime){
@@ -32,7 +47,10 @@ class Stopwatch extends Component {
   }
 
   stop() {
+    this.setState({stopped: true})
     clearInterval(timer);
+    if (this.props.callback)
+      this.props.callback(this.state.time);
   }
 
   reset() {
@@ -46,8 +64,7 @@ class Stopwatch extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Remaining time :{this.state.remainingTime}</Text>
-        <Button title ="Start timer" onPress={()=>this.countdownTimer()}/>
+        <Text>Time :{this.state.time}</Text>
       </View>
     );
   }
@@ -61,5 +78,3 @@ class Stopwatch extends Component {
      alignItems:'center',
    } 
 });
-
-  export default Stopwatch;

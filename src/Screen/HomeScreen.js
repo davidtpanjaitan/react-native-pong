@@ -77,8 +77,6 @@ export default class HomeScreen extends React.Component {
     ).start()
   }
 
-  compon
-
   render() {
     return (
       <View>
@@ -90,7 +88,7 @@ export default class HomeScreen extends React.Component {
               <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>The Impossible Game</Text>
                 <Text style={styles.sectionDescription}>
-                  This game is just pong, but the opponent is perfect and i haven't really implemented a way to end the game, but it's a nice use of react native animation
+                  This game is just pong, but the opponent is perfect. There no real win condition, but it's a nice use of react native animation, so try to survive as long as you can.
                 </Text>
               </View>
               <Animated.View style={[styles.blueBox, {width:10, height:10, left:this.state.leftPos, top:this.state.topPos}]}></Animated.View>

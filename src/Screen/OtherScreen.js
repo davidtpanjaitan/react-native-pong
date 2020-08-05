@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 
 import { Easing } from 'react-native-reanimated';
+import Stopwatch from '../Component/stopwatch';
 export default class OtherScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -20,8 +21,9 @@ export default class OtherScreen extends React.Component {
       ballLeft: new Animated.Value(0),
       ballTop: new Animated.Value(0),
       playerLeft: new Animated.Value(0),
-      playerLife: 10,
-      bgcolor: 'black'
+      playerLife: 3,
+      bgcolor: 'black',
+      gameOver: false
     }
     this.state.ballLeft.addListener(({value}) => {this.ballx = value});
     this.state.playerLeft.addListener(({value})=>{this.playerx = value});
@@ -32,13 +34,18 @@ export default class OtherScreen extends React.Component {
         {moveX: this.state.playerLeft}
       ], {useNativeDriver: false})
     });
+    this.stopwatch = <Stopwatch callback={(time)=>{alert('you survived '+time+' seconds against the impossible opponent!')}}/>;
   }
 
   componentDidMount() {
     this.state.ballTop.addListener(({value}) => {
       if (value === 440) {
         if (this.ballx < this.playerx - 5 || this.ballx > this.playerx + 55) {
-          this.setState((prev)=>({playerLife: prev.playerLife-1, bgcolor:'red'}))
+          this.setState((prev)=>({playerLife: prev.playerLife-1, bgcolor:'red'}), ()=>{
+            if (this.state.playerLife === 0) {
+              this.gameOver();
+            }
+          })
           setTimeout(()=>{
             this.setState({bgcolor:'black'});
           }, 300)
@@ -100,7 +107,8 @@ export default class OtherScreen extends React.Component {
 
   gameOver() {
     this.vertiAnim.stop();
-    this.horiAnim.stop();  
+    this.horiAnim.stop();
+    this.props.navigation.goBack();
   }
 
   render() {
@@ -115,6 +123,7 @@ export default class OtherScreen extends React.Component {
             </View>
             <View style={this.Styles.scoreBoard}>
               <Text>Player Life: {this.state.playerLife}</Text>
+              {this.stopwatch}
             </View>
         </>
     );
