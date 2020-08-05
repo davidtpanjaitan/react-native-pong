@@ -20,7 +20,8 @@ export default class OtherScreen extends React.Component {
       ballLeft: new Animated.Value(0),
       ballTop: new Animated.Value(0),
       playerLeft: new Animated.Value(0),
-      playerLife: 10
+      playerLife: 10,
+      bgcolor: 'black'
     }
     this.state.ballLeft.addListener(({value}) => {this.ballx = value});
     this.state.playerLeft.addListener(({value})=>{this.playerx = value});
@@ -37,7 +38,10 @@ export default class OtherScreen extends React.Component {
     this.state.ballTop.addListener(({value}) => {
       if (value === 440) {
         if (this.ballx < this.playerx - 5 || this.ballx > this.playerx + 55) {
-          this.setState((prev)=>({playerLife: prev.playerLife-1}))
+          this.setState((prev)=>({playerLife: prev.playerLife-1, bgcolor:'red'}))
+          setTimeout(()=>{
+            this.setState({bgcolor:'black'});
+          }, 300)
         }
       }
     })
@@ -102,7 +106,7 @@ export default class OtherScreen extends React.Component {
   render() {
     return (
         <>
-            <View style={{width:'100%', height:'90%', backgroundColor:'black'}}>
+            <View style={{width:'100%', height:'90%', backgroundColor:this.state.bgcolor}}>
                 <Animated.View style={[this.Styles.bar, this.Styles.enemy, {left: this.state.ballLeft}]}></Animated.View>
                 <View style={this.Styles.field}>
                     <Animated.View style={[this.Styles.ball, {left: this.state.ballLeft, top: this.state.ballTop}]}></Animated.View>
