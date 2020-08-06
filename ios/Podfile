@@ -8,6 +8,8 @@ target 'rncli_project' do
 
   use_react_native!(:path => config["reactNativePath"])
 
+  pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
+
   target 'rncli_projectTests' do
     inherit! :complete
     # Pods for testing

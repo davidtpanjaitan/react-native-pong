@@ -8,18 +8,21 @@ import {
   StatusBar,
   Button,
   Animated,
-  Dimensions
+  Dimensions,
+  FlatList
 } from 'react-native';
 import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
+  Colors
 } from 'react-native/Libraries/NewAppScreen';
 import { Easing } from 'react-native-reanimated';
 
-export default class HomeScreen extends React.Component {
+import { connect } from 'react-redux';
+import { PersistGate } from 'redux-persist/lib/integration/react';
+import { persistor } from '../store';
+import { bindActionCreators } from 'redux';
+import { actions } from '../Action/TimeActions';
+
+class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -77,6 +80,12 @@ export default class HomeScreen extends React.Component {
     ).start()
   }
 
+  parseDatetime(date) {
+    let dateString = (new Date(date)).toISOString().split('T')
+    dateString = dateString[0] +' '+ dateString[1].substring(0,8)
+    return dateString;
+  }
+
   render() {
     return (
       <View>
@@ -88,7 +97,7 @@ export default class HomeScreen extends React.Component {
               <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>The Impossible Game</Text>
                 <Text style={styles.sectionDescription}>
-                  This game is just pong, but the opponent is perfect. There no real win condition, but it's a nice use of react native animation, so try to survive as long as you can.
+                  This game is just pong, but the opponent is perfect. There is no real win condition, but it's a nice use of react native animation, so try to survive as long as you can.
                 </Text>
               </View>
               <Animated.View style={[styles.blueBox, {width:10, height:10, left:this.state.leftPos, top:this.state.topPos}]}></Animated.View>
@@ -99,7 +108,6 @@ export default class HomeScreen extends React.Component {
                 </Text>
               </View>
               <Button
-              style={{width:100}}
                 onPress={() => {
                   this.props.navigation.navigate('Other')
                 }}
@@ -107,6 +115,27 @@ export default class HomeScreen extends React.Component {
               />
             </View>
           </ScrollView>
+          <PersistGate loading={<Text>loading scores...</Text>} persistor={persistor}>
+            <View style={styles.scoreBoard}>
+              <Text style={styles.bestTime}>Best time: {this.props.timeScore.bestTime} seconds</Text>
+              <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                <Text>Score history</Text>
+                <Button 
+                  onPress={()=>this.props.clearHistoryDispatch()}
+                  title="Clear"
+                />
+              </View>
+              <FlatList
+                data={this.props.timeScore.timeHistory}
+                renderItem={({item}) => 
+                  <View style={styles.listItem}>
+                    <Text>{item.time} seconds</Text>
+                    <Text>{this.parseDatetime(item.datetime)}</Text>
+                  </View>
+                }
+              />
+            </View>
+          </PersistGate>
         </SafeAreaView>
       </View>
     );
@@ -127,6 +156,7 @@ const styles = StyleSheet.create({
   sectionContainer: {
     marginTop: 32,
     paddingHorizontal: 24,
+    marginBottom: 16
   },
   sectionTitle: {
     fontSize: 24,
@@ -145,6 +175,9 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
+  scoreBoard: {
+    margin: 15,
+  },
   footer: {
     color: Colors.dark,
     fontSize: 12,
@@ -153,4 +186,33 @@ const styles = StyleSheet.create({
     paddingRight: 12,
     textAlign: 'right',
   },
+  bestTime: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10
+  },
+  listItem: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    paddingBottom: 7,
+    borderTopColor: 'gray',
+    borderTopWidth: 1
+  }
 });
+
+const mapStateToProps = (state) => {
+  return { timeScore: state.time }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators({
+    clearHistoryDispatch: actions.clearHistory,
+  }, dispatch);
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HomeScreen);

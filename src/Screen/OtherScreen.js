@@ -14,7 +14,13 @@ import {
 
 import { Easing } from 'react-native-reanimated';
 import Stopwatch from '../Component/stopwatch';
-export default class OtherScreen extends React.Component {
+
+import { connect } from 'react-redux';
+import { actions } from '../Action/TimeActions';
+import { bindActionCreators } from 'redux';
+import { dispatch } from 'react-redux';
+
+class OtherScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -23,10 +29,18 @@ export default class OtherScreen extends React.Component {
       playerLeft: new Animated.Value(0),
       playerLife: 3,
       bgcolor: 'black',
-      gameOver: false
+      gameOver: false,
+      stopwatch: null
     }
     this.state.ballLeft.addListener(({value}) => {this.ballx = value});
-    this.state.playerLeft.addListener(({value})=>{this.playerx = value});
+    this.state.playerLeft.addListener(({value})=> {
+      this.playerx = value;
+      if (!this.state.stopwatch)
+        this.setState({stopwatch: <Stopwatch callback={(time)=>{
+          this.props.addNewScoreDispatcher(time);
+          alert('you survived '+time+' seconds against the impossible opponent!');
+        }}/>});
+    });
     this.panResponder = PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: Animated.event([
@@ -34,7 +48,6 @@ export default class OtherScreen extends React.Component {
         {moveX: this.state.playerLeft}
       ], {useNativeDriver: false})
     });
-    this.stopwatch = <Stopwatch callback={(time)=>{alert('you survived '+time+' seconds against the impossible opponent!')}}/>;
   }
 
   componentDidMount() {
@@ -123,7 +136,7 @@ export default class OtherScreen extends React.Component {
             </View>
             <View style={this.Styles.scoreBoard}>
               <Text>Player Life: {this.state.playerLife}</Text>
-              {this.stopwatch}
+              {this.state.stopwatch}
             </View>
         </>
     );
@@ -158,3 +171,13 @@ export default class OtherScreen extends React.Component {
   })
 }
 
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators({
+      addNewScoreDispatcher: actions.newScore
+    }, dispatch );
+  }
+
+export default connect(
+  ()=>({}),
+  mapDispatchToProps
+)(OtherScreen);
