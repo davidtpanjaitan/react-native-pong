@@ -11,7 +11,7 @@ export const TimeReducer = (state = initState, action) => {
             const newstate = {};
             newstate.bestTime = action.payload > state.bestTime ? action.payload : state.bestTime;
             newstate.timeHistory = [{
-                key: (nextKey++).toString(),
+                key: (Date.now()).toString(),
                 time: action.payload,
                 datetime: Date.now()
             }, ...state.timeHistory];

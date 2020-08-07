@@ -27,11 +27,29 @@ class HomeScreen extends React.Component {
     super(props);
     this.state = {
       leftPos: new Animated.Value(0),
-      topPos: new Animated.Value(0)
+      topPos: new Animated.Value(0),
+      worldRecord: 0,
     };
   }
-  
+
+  componentDidUpdate() {
+    if (this.props.timeScore.bestTime > this.state.worldRecord) {
+      fetch(`https://csrng.net/csrng/csrng.php?min=${this.props.timeScore.bestTime}&max=${this.props.timeScore.bestTime+50}`)
+        .then((response) => {
+          response.json().then((val)=>{
+            console.log(val[0])
+            this.setState({worldRecord: val[0].random});
+          });
+        }, (error) => {
+          console.log('FAIL');
+          console.log(error);
+          this.setState({worldRecord: this.props.timeScore.bestTime});
+        });
+    }
+  }
+
   componentDidMount() {
+    
     Animated.loop(
       Animated.sequence([
         Animated.timing(
@@ -117,8 +135,9 @@ class HomeScreen extends React.Component {
           </ScrollView>
           <PersistGate loading={<Text>loading scores...</Text>} persistor={persistor}>
             <View style={styles.scoreBoard}>
-              <Text style={styles.bestTime}>Best time: {this.props.timeScore.bestTime} seconds</Text>
-              <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+              <Text style={styles.bestTime}>Your best time: {this.props.timeScore.bestTime} seconds</Text>
+              <Text style={styles.bestTime}>World record time: {this.state.worldRecord} seconds</Text>
+              <View style={{flexDirection:'row', justifyContent:'space-between', margin:5}}>
                 <Text>Score history</Text>
                 <Button 
                   onPress={()=>this.props.clearHistoryDispatch()}
